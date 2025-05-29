@@ -250,6 +250,11 @@
             </div>
             <!-- ... otros info-items ... -->
         </div>
+        <div class="container text-center mb-4">
+            <button id="toggleEstadoButton" class="btn btn-warning">
+                <i class="fas fa-exchange-alt me-2"></i>On/Off
+            </button>
+        </div>
     </div>
 
     <!-- 4) Script de inicialización, carga y realtime -->
@@ -359,6 +364,49 @@
       console.log('[realtime] suscripción exitosa');
     }
   }
+
+  // 4) Función para invertir el estado de la última fila
+  async function toggleEstado() {
+    // 4.1) Traer la fila más reciente
+    const { data: rows, error: selErr } = await supabase
+      .from('termometro')
+      .select('*')
+      .order('timestamp', { ascending: false })
+      .limit(1);
+    if (selErr) {
+      return console.error('Error al consultar última fila:', selErr);
+    }
+    if (!rows.length) {
+      return console.warn('No hay filas en termometro');
+    }
+    const last = rows[0];
+
+    // 4.2) Preparar la nueva fila con estado opuesto
+    const nueva = {
+      temperatura_valor:       last.temperatura_valor,
+      unidad_temperatura_id:   last.unidad_temperatura_id,
+      estado:                  !last.estado,
+      bateria_porcentaje:      last.bateria_porcentaje,
+      senal_red_dbm:           last.senal_red_dbm,
+      // timestamp lo pone PostgreSQL automáticamente
+    };
+
+    // 4.3) Insertar la nueva fila
+    const { data: insData, error: insErr } = await supabase
+      .from('termometro')
+      .insert([nueva]);
+    if (insErr) {
+      console.error('Error al insertar fila invertida:', insErr);
+    } else {
+      console.log('Fila invertida insertada:', insData);
+    }
+  }
+
+  // 5) Conectar el botón a la función
+  document
+    .getElementById('toggleEstadoButton')
+    .addEventListener('click', toggleEstado);
+  
 
   // 4) Inicializar todo
   (async () => {
