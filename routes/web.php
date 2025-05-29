@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TermometroController;
+use App\Http\Controllers\HigrometroController;
+use App\Http\Controllers\CalidadAireController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -22,8 +25,15 @@ Route::get('/termometro/ultimas', [TermometroController::class, 'ultimas'])
      ->name('termometro.ultimas');
 
 // Vistas estáticas para otros sensores
-Route::view('/higrometro', 'higrometro')
+Route::get('/higrometro', [HigrometroController::class, 'index'])
      ->name('higrometro');
 
-Route::view('/calidad-aire', 'calidad_aire')
+Route::get('/higrometro/ultimas', [HigrometroController::class, 'ultimas'])
+     ->name('higrometro.ultimas');
+
+Route::get('/calidad-aire', [CalidadAireController::class, 'index'])
      ->name('calidad_aire');
+
+// API: últimas lecturas para inicializar y refrescar
+Route::get('/calidad-aire/ultimas', [CalidadAireController::class, 'ultimas'])
+     ->name('calidad_aire.ultimas');
